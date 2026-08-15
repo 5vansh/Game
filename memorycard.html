@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sunset Memory Cards</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(180deg, #9d4964 0%, #d86e54 45%, #f3b15d 100%);
+            color: white;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #ffd978;
+            top: 25px;
+            right: 10%;
+            box-shadow: 0 0 35px rgba(255, 220, 120, .5);
+        }
+
+        .container {
+            position: relative;
+            width: min(750px, 94vw);
+            margin: auto;
+            padding-top: 10px;
+        }
+
+        h1 {
+            text-align: center;
+            margin: 0;
+            font-size: 28px;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 4px #442b35;
+        }
+
+        .subtitle {
+            text-align: center;
+            margin: 2px 0 10px;
+            color: #ffe4c4;
+            font-size: 14px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(35, 20, 30, .5);
+            padding: 6px 14px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, .2);
+            font-size: 14px;
+        }
+
+        .stat {
+            font-weight: bold;
+        }
+
+        button {
+            border: 0;
+            border-radius: 6px;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: .2s;
+            font-size: 13px;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+        }
+
+        .restart {
+            background: #f2a35b;
+            color: #321f29;
+        }
+
+        .board {
+            width: min(480px, 85vw);
+            margin: auto;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+
+        .card {
+            aspect-ratio: 1;
+            perspective: 800px;
+            cursor: pointer;
+        }
+
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform .45s;
+            transform-style: preserve-3d;
+        }
+
+        .card.flipped .card-inner,
+        .card.matched .card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .card-front,
+        .card-back {
+            position: absolute;
+            inset: 0;
+            backface-visibility: hidden;
+            border-radius: 8px;
+        }
+
+        .card-front {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(145deg, #4b3042, #2b2230);
+            border: 2px solid #e6a35f;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, .3), inset 0 0 10px rgba(255, 190, 100, .12);
+        }
+
+        .card-front::after {
+            content: "?";
+            font-size: 24px;
+            color: #e6a35f;
+            font-weight: bold;
+        }
+
+        .card-back {
+            transform: rotateY(180deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(145deg, #ffe2ae, #e9a965);
+            border: 2px solid #fff0ca;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, .25);
+            font-size: 30px;
+        }
+
+        .card.matched .card-back {
+            box-shadow: 0 0 12px rgba(255, 230, 140, .9);
+        }
+
+        .message {
+            text-align: center;
+            margin-top: 8px;
+            font-size: 14px;
+            color: #fff0dc;
+        }
+
+        #screen {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            background: rgba(0, 0, 0, 0.85);
+            text-align: center;
+            z-index: 10;
+        }
+
+        #screen h2 {
+            margin: 0 0 10px;
+            font-size: 40px;
+            letter-spacing: 2px;
+        }
+
+        #screen p {
+            color: #ccc;
+            font-size: 16px;
+        }
+
+        .screen-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .play {
+            background: #e77b4f;
+            color: white;
+        }
+
+        .exit {
+            background: #393039;
+            color: white;
+        }
+
+        @media(max-width: 600px) {
+            .container {
+                padding-top: 8px;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+
+            .board {
+                gap: 6px;
+                width: min(360px, 90vw);
+            }
+
+            .stats {
+                font-size: 12px;
+                padding: 6px;
+            }
+
+            .card-back {
+                font-size: 24px;
+            }
+
+            .card-front::after {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>MEMORY CARDS</h1>
+        <div class="subtitle">Find all matching pairs!</div>
+
+        <div class="stats">
+            <div class="stat">🎯 Moves: <span id="moves">0</span></div>
+            <div class="stat">🏆 Pairs: <span id="pairs">0</span>/8</div>
+            <div class="stat">⏱️ Time: <span id="timer">0</span>s</div>
+            <button class="restart" onclick="restartGame()">Restart</button>
+        </div>
+
+        <div class="board" id="board"></div>
+        <div class="message" id="message">Choose two cards to find a pair.</div>
+    </div>
+
+    <div id="screen">
+        <h2 id="screenTitle">🏆 YOU WON!</h2>
+        <p id="screenMessage">All pairs found!</p>
+        <div class="screen-buttons">
+            <button class="play" onclick="restartGame()">▶ PLAY AGAIN</button>
+            <button class="exit" onclick="exitGame()">✕ EXIT</button>
+        </div>
+    </div>
+
+    <script>
+        const board = document.getElementById("board");
+        const movesText = document.getElementById("moves");
+        const pairsText = document.getElementById("pairs");
+        const timerText = document.getElementById("timer");
+        const message = document.getElementById("message");
+        const screen = document.getElementById("screen");
+        const screenTitle = document.getElementById("screenTitle");
+        const screenMessage = document.getElementById("screenMessage");
+
+        const symbols = ["🍎", "🚀", "⭐", "🎮", "🐱", "⚽", "🍕", "🌙"];
+
+        let cards = [];
+        let firstCard = null;
+        let secondCard = null;
+        let lockBoard = false;
+        let moves = 0;
+        let matchedPairs = 0;
+        let time = 0;
+        let timer = null;
+        let gameRunning = true;
+
+        function startGame() {
+            moves = 0;
+            matchedPairs = 0;
+            time = 0;
+            gameRunning = true;
+            firstCard = null;
+            secondCard = null;
+            lockBoard = false;
+
+            movesText.textContent = 0;
+            pairsText.textContent = 0;
+            timerText.textContent = 0;
+            message.textContent = "Choose two cards to find a pair.";
+            screen.style.display = "none";
+
+            createCards();
+            startTimer();
+        }
+
+        function createCards() {
+            board.innerHTML = "";
+            cards = [];
+
+            const deck = [...symbols, ...symbols].sort(() => Math.random() - 0.5);
+
+            deck.forEach((symbol, index) => {
+                const card = document.createElement("div");
+                card.className = "card";
+                card.dataset.symbol = symbol;
+                card.dataset.index = index;
+
+                card.innerHTML = `
+                    <div class="card-inner">
+                        <div class="card-front"></div>
+                        <div class="card-back">${symbol}</div>
+                    </div>
+                `;
+
+                card.addEventListener("click", () => flipCard(card));
+                board.appendChild(card);
+                cards.push(card);
+            });
+        }
+
+        function flipCard(card) {
+            if (!gameRunning || lockBoard || card === firstCard || card.classList.contains("matched")) {
+                return;
+            }
+
+            card.classList.add("flipped");
+
+            if (!firstCard) {
+                firstCard = card;
+                message.textContent = "Now choose another card.";
+                return;
+            }
+
+            secondCard = card;
+            movesText.textContent = ++moves;
+            checkMatch();
+        }
+
+        function checkMatch() {
+            const isMatch = firstCard.dataset.symbol === secondCard.dataset.symbol;
+
+            if (isMatch) {
+                firstCard.classList.add("matched");
+                secondCard.classList.add("matched");
+                pairsText.textContent = ++matchedPairs;
+                message.textContent = "✨ Great! You found a pair.";
+                resetSelection();
+
+                if (matchedPairs === symbols.length) {
+                    winGame();
+                }
+            } else {
+                lockBoard = true;
+                message.textContent = "❌ Not a match!";
+                setTimeout(() => {
+                    firstCard.classList.remove("flipped");
+                    secondCard.classList.remove("flipped");
+                    resetSelection();
+                    message.textContent = "Try again!";
+                }, 700);
+            }
+        }
+
+        function resetSelection() {
+            firstCard = null;
+            secondCard = null;
+            lockBoard = false;
+        }
+
+        function startTimer() {
+            clearInterval(timer);
+            timer = setInterval(() => {
+                if (gameRunning) {
+                    timerText.textContent = ++time;
+                }
+            }, 1000);
+        }
+
+        function winGame() {
+            gameRunning = false;
+            clearInterval(timer);
+            setTimeout(() => {
+                screenTitle.textContent = "🏆 YOU WON!";
+                screenMessage.textContent = `Cleared in ${moves} moves and ${time} seconds!`;
+                screen.style.display = "flex";
+            }, 500);
+        }
+
+        function restartGame() {
+            clearInterval(timer);
+            startGame();
+        }
+
+        function exitGame() {
+            gameRunning = false;
+            clearInterval(timer);
+            screen.style.display = "none";
+            document.body.innerHTML = '<div style="position:fixed;inset:0;background:#000"></div>';
+        }
+
+        startGame();
+    </script>
+</body>
+</html>
