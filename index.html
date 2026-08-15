@@ -4,203 +4,71 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Game Launcher</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#070913">
   <style>
-    :root {
-      --bg-dark: #070913;
-      --card-bg: rgba(18, 24, 43, 0.75);
-      --gradient-accent: linear-gradient(135deg, #38bdf8 0%, #a855f7 50%, #6366f1 100%);
-      --glow-blue: rgba(56, 189, 248, 0.4);
-      --glow-purple: rgba(168, 85, 247, 0.4);
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      background-color: var(--bg-dark);
-      color: #f8fafc;
+      background: #070913;
+      color: #fff;
+      font-family: sans-serif;
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
       min-height: 100vh;
-      padding: 3rem 1.5rem;
-      position: relative;
-      overflow-x: hidden;
+      padding: 2rem;
     }
-
-    body::before, body::after {
-      content: '';
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(140px);
-      z-index: 0;
-      pointer-events: none;
-      animation: pulseGlow 8s infinite alternate ease-in-out;
-    }
-
-    body::before {
-      width: 450px;
-      height: 450px;
-      background: rgba(56, 189, 248, 0.15);
-      top: -100px;
-      left: -100px;
-    }
-
-    body::after {
-      width: 500px;
-      height: 500px;
-      background: rgba(168, 85, 247, 0.15);
-      bottom: -150px;
-      right: -100px;
-      animation-delay: -4s;
-    }
-
-    @keyframes pulseGlow {
-      0% { transform: scale(1) translate(0, 0); opacity: 0.6; }
-      100% { transform: scale(1.2) translate(30px, 40px); opacity: 0.9; }
-    }
-
     h1 {
-      position: relative;
-      z-index: 1;
-      margin-bottom: 3rem;
-      font-size: 2.75rem;
-      font-weight: 900;
+      margin-bottom: 2rem;
+      font-size: 2.5rem;
+      background: linear-gradient(135deg, #38bdf8, #a855f7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
       text-transform: uppercase;
-      letter-spacing: 4px;
-      background: var(--gradient-accent);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-shadow: 0 0 30px rgba(168, 85, 247, 0.3);
-      animation: fadeInDown 0.8s ease-out;
+      letter-spacing: 2px;
     }
-
-    .menu-container {
-      position: relative;
-      z-index: 1;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 2rem;
-      width: 100%;
-      max-width: 1000px;
-    }
-
-    .game-card {
-      position: relative;
-      background: var(--card-bg);
-      backdrop-filter: blur(12px);
-      border-radius: 16px;
-      padding: 2rem 1.5rem;
-      text-align: center;
-      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    .grid {
       display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      overflow: hidden;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-      animation: fadeInUp 0.8s ease-out backwards;
+      gap: 2rem;
+      flex-wrap: wrap;
+      justify-content: center;
     }
-
-    .game-card:nth-child(1) { animation-delay: 0.1s; }
-    .game-card:nth-child(2) { animation-delay: 0.25s; }
-    .game-card:nth-child(3) { animation-delay: 0.4s; }
-
-    .game-card::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: 16px;
-      padding: 2px;
-      background: linear-gradient(135deg, rgba(56, 189, 248, 0.3), rgba(168, 85, 247, 0.3));
-      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      -webkit-mask-composite: xor;
-      mask-composite: exclude;
-      transition: background 0.4s ease;
-      pointer-events: none;
+    .card {
+      background: #1e293b;
+      border: 2px solid #38bdf8;
+      border-radius: 12px;
+      width: 280px;
+      padding: 2rem;
+      text-align: center;
+      box-shadow: 0 0 20px rgba(56,189,248,0.2);
+      transition: transform 0.2s ease, border-color 0.2s ease;
     }
-
-    .game-card:hover {
-      transform: translateY(-10px) scale(1.02);
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6),
-                  0 0 25px var(--glow-blue),
-                  0 0 40px var(--glow-purple);
+    .card:hover {
+      transform: translateY(-5px);
+      border-color: #a855f7;
     }
-
-    .game-card:hover::before {
-      background: var(--gradient-accent);
-    }
-
-    .game-title {
-      font-size: 1.5rem;
-      font-weight: 700;
+    .card h2 {
       margin-bottom: 0.75rem;
-      color: #fff;
-      transition: color 0.3s ease;
+      font-size: 1.5rem;
     }
-
-    .game-card:hover .game-title {
-      background: var(--gradient-accent);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    p {
+    .card p {
       color: #94a3b8;
       font-size: 0.95rem;
-      line-height: 1.5;
       margin-bottom: 1.5rem;
     }
-
-    .game-link {
-      position: relative;
+    .btn {
       display: inline-block;
-      width: 100%;
-      padding: 0.8rem 1.5rem;
-      background: var(--gradient-accent);
-      color: #ffffff;
+      padding: 0.75rem 1.5rem;
+      background: linear-gradient(135deg, #38bdf8, #a855f7);
+      color: #fff;
       text-decoration: none;
-      border-radius: 8px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      font-size: 0.875rem;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 15px rgba(56, 189, 248, 0.25);
-      overflow: hidden;
+      font-weight: bold;
+      border-radius: 6px;
+      transition: opacity 0.2s ease;
     }
-
-    .game-link::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-      transition: left 0.5s ease;
-    }
-
-    .game-link:hover::after {
-      left: 100%;
-    }
-
-    .game-link:hover {
-      box-shadow: 0 6px 20px var(--glow-purple), 0 0 15px var(--glow-blue);
-      transform: scale(1.02);
-    }
-
-    @keyframes fadeInDown {
-      from { opacity: 0; transform: translateY(-30px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(40px); }
-      to { opacity: 1; transform: translateY(0); }
+    .btn:hover {
+      opacity: 0.9;
     }
   </style>
 </head>
@@ -208,34 +76,33 @@
 
   <h1>Select a Game</h1>
 
-  <div class="menu-container">
+  <div class="grid">
     <!-- Game 1: Flappy Bird -->
-    <div class="game-card">
-      <div>
-        <h2 class="game-title">Flappy Bird</h2>
-        <p>Flap your wings and navigate through obstacles.</p>
-      </div>
-      <a href="flappybird.html" class="game-link">Play Now</a>
+    <div class="card">
+      <h2>Flappy Bird</h2>
+      <p>Tap or press space to fly through the pipes without crashing.</p>
+      <a href="flappybird.html" class="btn">Play Flappy Bird</a>
     </div>
 
     <!-- Game 2: Level Devil -->
-    <div class="game-card">
-      <div>
-        <h2 class="game-title">Level Devil</h2>
-        <p>Navigate tricky platforms and unpredictable traps.</p>
-      </div>
-      <a href="leveldevil.html" class="game-link">Play Now</a>
+    <div class="card">
+      <h2>Level Devil</h2>
+      <p>A platformer where traps are everywhere. Reach the door to win!</p>
+      <a href="leveldevil.html" class="btn">Play Level Devil</a>
     </div>
 
     <!-- Game 3: Memory Card -->
-    <div class="game-card">
-      <div>
-        <h2 class="game-title">Memory Card</h2>
-        <p>Challenge your focus and match all hidden pairs.</p>
-      </div>
-      <a href="memorycard.html" class="game-link">Play Now</a>
+    <div class="card">
+      <h2>Memory Card</h2>
+      <p>Test your memory by matching all the pairs of icons correctly.</p>
+      <a href="memorycard.html" class="btn">Play Memory Card</a>
     </div>
   </div>
 
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js');
+    }
+  </script>
 </body>
 </html>
